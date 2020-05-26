@@ -1,0 +1,12 @@
+frontend/node_modules/
+backend/node_modules/
+frontend/*.log
+backend/*.log
+frontend/haters/
+backend/haters/
+frontend/.next/
+backend/.next/
+frontend/.build/
+backend/.build/
+layout.md
+variables.env

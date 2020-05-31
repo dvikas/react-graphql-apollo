@@ -32,7 +32,8 @@ export default class CreateItems extends Component {
     description: '',
     image: '',
     largeImage: '',
-    price: 0
+    price: 0,
+    fileUploaded: true
   }
 
   handleChange = e => {
@@ -48,7 +49,9 @@ export default class CreateItems extends Component {
     data.append('file', file);
     data.append('upload_preset', 'sickfits');
     console.log(file)
-
+    this.setState({
+      fileUploaded: false
+    })
     const res = await fetch('https://api.cloudinary.com/v1_1/dvikas/image/upload', {
       method: 'post',
       body: data
@@ -57,7 +60,8 @@ export default class CreateItems extends Component {
     console.log(resFile);
     this.setState({
       image: resFile.secure_url,
-      largeImage: resFile.eager[0].secure_url
+      largeImage: resFile.eager[0].secure_url,
+      fileUploaded: true
     })
   }
 
@@ -131,7 +135,8 @@ export default class CreateItems extends Component {
                   />
                 </label>
 
-                <button type="submit">Submit</button>
+                <button disabled={!this.state.fileUploaded}
+                type="submit">Submit</button>
               </fieldset>
             </Form>
           )

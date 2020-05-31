@@ -1,3 +1,8 @@
-import Home from './index'
+import Items from './index'
 
-export default Home;
+const ItemsHome = props => (
+  <div>
+    <Items page={parseInt(props.query.page) || 1} />
+  </div>
+)
+export default ItemsHome;

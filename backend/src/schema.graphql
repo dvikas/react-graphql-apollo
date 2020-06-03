@@ -16,10 +16,13 @@ type Mutation {
   deleteItem(id: ID!): Item!
 
   signup(email: String!, name: String!, password: String!): User!
+
+  signin(email: String!, password: String!): User!
 }
 
 type Query {
   items(where: ItemWhereInput, orderBy: ItemOrderByInput, skip: Int, first: Int): [Item]!
   item(where: ItemWhereUniqueInput!): Item
   itemsConnection(where: ItemWhereInput): ItemConnection!
+  me: User
 }

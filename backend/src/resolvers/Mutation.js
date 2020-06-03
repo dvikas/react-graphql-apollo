@@ -44,7 +44,7 @@ const mutations = {
       password,
       permissions: { set: ['USER'] }
     };
-    console.log(data)
+    // console.log(data)
     // create User in the DB
     const user = await ctx.db.mutation.createUser({
       data
@@ -56,6 +56,30 @@ const mutations = {
       httpOnly: true,
       maxAge: 1000 * 60 * 60 * 24 * 365 // 1 year cookie
     })
+    return user;
+
+  },
+
+  async signin(parent, { email, password }, ctx, info) {
+
+    // 1. check if there is a user with that email address
+    const user = await ctx.db.query.user({ where: { email } });
+    if (!user) {
+      throw new Error('Invalid username password');
+    }
+    // 2. check if their password is correct
+    const isValid = await bcrypt.compare(password, user.password);
+    if (!isValid) {
+      throw new Error('Invalid username password');
+    }
+    // 3. generate the JWT token
+    const token = jwt.sign({ userId: user.id }, process.env.APP_SECRET);
+    // 4. Set the cookie with the token
+    ctx.response.cookie('token', token, {
+      httpOnly: true,
+      maxAge: 1000 * 60 * 60 * 24 * 365
+    })
+    // 5. return User
     return user;
   }
 };

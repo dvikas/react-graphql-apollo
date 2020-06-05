@@ -3,9 +3,13 @@ const jwt = require('jsonwebtoken');
 const { randomBytes } = require('crypto');
 const { promisify } = require('util');
 const { transport, makeANiceEmail } = require('../mail');
+const { hasPermission } = require('../utils');
 
 const mutations = {
   async createItem(parent, args, ctx, info) {
+    if (!ctx.request.userId) {
+      throw new Error('Unauthorized user')
+    }
     const item = await ctx.db.mutation.createItem({
       data: {
         ...args
@@ -45,7 +49,7 @@ const mutations = {
     const data = {
       ...args,
       password,
-      permissions: { set: ['USER'] }
+      permissions: { set: ['USER', 'ADMIN'] }
     };
     // console.log(data)
     // create User in the DB
@@ -157,6 +161,33 @@ const mutations = {
     })
     // 8. return the new User
     return updatedUser;
+  },
+  async updatePermission(parent, args, ctx, info) {
+    // check if user is loggedIn
+    if (!ctx.request.userId) {
+      throw new Error('You must be logged In')
+    }
+    // get details of requested user
+    const currentUser = await ctx.db.query.user({
+      where: {
+        id: ctx.request.userId
+      }
+    }, info);
+    // check if loggedin user has permission to do action
+    hasPermission(currentUser, ['ADMIN', 'PERMISSION_UPDATE']);
+    console.log('args.permissions', args.permissions);
+
+    // update the permission
+    ctx.db.mutation.updateUser({
+      data: {
+        permissions: {
+          set: args.permissions
+        }
+      },
+      where: {
+        id: args.userId
+      }
+    }, info);
   }
 };
 

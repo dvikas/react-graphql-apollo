@@ -1,8 +1,11 @@
 import Link from 'next/link';
-import CreateItem from '../components/CreateItems'
+import CreateItem from '../components/CreateItems';
+import AuthGuard from '../components/AuthGuard';
+
 const Sell = props => (
-  <CreateItem>
-  </CreateItem>
+  <AuthGuard>
+    <CreateItem />
+  </AuthGuard>
 );
 
 export default Sell;

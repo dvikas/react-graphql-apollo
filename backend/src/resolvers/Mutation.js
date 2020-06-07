@@ -48,7 +48,7 @@ const mutations = {
     console.log('Permissions:', ctx.request.user.permissions);
     const canDelete = ctx.request.user.permissions.some(permission => ['ADMIN', 'ITEM_DELETE'].includes(permission));
     console.log(isOwner, canDelete);
-    if (!isOwner || !canDelete) {
+    if (!isOwner && !canDelete) {
       throw new Error("You don't have sufficient permissions to delete this item.");
     }
     return ctx.db.mutation.deleteItem({ where }, info);
@@ -200,6 +200,38 @@ const mutations = {
         id: args.userId
       }
     }, info);
+  },
+  async addToCart(parent, args, ctx, info) {
+    // 1. make Sure they are signed In
+    const userId = ctx.request.userId
+
+    // 2. Query the users current Cart
+    const [existingCartItem] = await ctx.db.query.cartItems({
+      where: {
+        user: { id: userId },
+        item: { id: args.id }
+      }
+    });
+
+    // 3. Check if that item is already in their Cart if exists then +1
+    if (existingCartItem) {
+      console.log('This item is already in cart');
+      return ctx.db.mutation.updateCartItem({
+        where: { id: existingCartItem.id },
+        data: { quantity: existingCartItem.quantity + 1 }
+      })
+    }
+    // 4. if Item is not in cart then create item
+    return ctx.db.mutation.createCartItem({
+      data: {
+        user: {
+          connect: { id: userId }
+        },
+        item: {
+          connect: { id: args.id }
+        }
+      }
+    })
   }
 };
 

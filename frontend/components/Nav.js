@@ -9,6 +9,10 @@ const Nav = () => (
     {
       ({ data: { me } }) => (
         <NavStyles>
+          {me && (
+            <small>{me.email}</small>
+          )
+          }
           <Link href="/items">
             <a>Items</a>
           </Link>

@@ -12,6 +12,12 @@ const mutations = {
     }
     const item = await ctx.db.mutation.createItem({
       data: {
+        // This is how to create a relationship between the Item and the User
+        user: {
+          connect: {
+            id: ctx.request.userId,
+          },
+        },
         ...args
       }
     }, info);
@@ -34,11 +40,17 @@ const mutations = {
 
   async deleteItem(parent, args, ctx, info) {
     const where = { id: args.id };
+    // const where = { id: 12 };
     // 1. find the item in the
-    const item = await ctx.db.query.item({ where }, `{id title}`);
+    const item = await ctx.db.query.item({ where }, `{id title user {id}}`);
     // 2. Check for permission (if user own that item)
-    // TODO
-    // 3. Delete Item
+    const isOwner = item.user.id === ctx.request.userId;
+    console.log('Permissions:', ctx.request.user.permissions);
+    const canDelete = ctx.request.user.permissions.some(permission => ['ADMIN', 'ITEM_DELETE'].includes(permission));
+    console.log(isOwner, canDelete);
+    if (!isOwner || !canDelete) {
+      throw new Error("You don't have sufficient permissions to delete this item.");
+    }
     return ctx.db.mutation.deleteItem({ where }, info);
   },
 

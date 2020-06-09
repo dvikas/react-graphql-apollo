@@ -232,6 +232,27 @@ const mutations = {
         }
       }
     })
+  },
+
+  async removeFromCart(parent, args, ctx, info) {
+    // 1. Find the cart item
+    const cartItem = await ctx.db.query.cartItem({
+      where: {
+        id: args.id
+      },
+    }, `{id, user{ id }}`)
+    if (!cartItem) {
+      throw new Error('Cart Item not found.')
+    }
+    // 2. Make sure they own that cart item
+    if (cartItem.user.id !== ctx.request.userId) {
+      throw new Error('Invalid Auth');
+    }
+    // 3. Delete that cart item
+    return ctx.db.mutation.deleteCartItem({
+      where: { id: args.id }
+    }, info);
+
   }
 };
 

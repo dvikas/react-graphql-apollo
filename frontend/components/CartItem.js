@@ -20,6 +20,9 @@ const CartItemStyle = styled.li`
 `;
 
 const CartItem = ({ item }) => {
+  if (!item.item) return <li>Item has been removed or unavailable.
+        <RemoveFromCart id={item.id} />
+  </li>;
   return <CartItemStyle>
     <img src={item.item.image} width="90" alt={item.item.title} />
     <div className="cart-item-details">
